@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iobeam_project_token">
+        PROJECT_TOKEN_HERE
+    </string>
+    <integer name="iobeam_project_id">0</integer>
+</resources>

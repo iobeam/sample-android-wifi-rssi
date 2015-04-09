@@ -1,5 +1,15 @@
 <resources>
-    <string name="app_name">iobeam Test</string>
+    <string name="app_name">iobeam Wifi RSSI</string>
     <string name="action_settings">Settings</string>
-    <string name="welcome_msg">Welcome to the iobeam test application.</string>
+    <string name="welcome_msg">Welcome to the iobeam WiFi RSSI test app.</string>
+    <string name="header_data_stats">Data sending statistics</string>
+    <string name="label_device_id">Device id:</string>
+    <string name="label_last_success">Last success:</string>
+    <string name="label_last_failure">Last failure:</string>
+    <string name="label_total_success">Total successes:</string>
+    <string name="label_total_failure">Total failures:</string>
+    <string name="error">ERROR</string>
+    <string name="never">Never</string>
+    <string name="none">0</string>
+    <string name="not_yet_set">Not set</string>
 </resources>

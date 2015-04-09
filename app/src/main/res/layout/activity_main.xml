@@ -5,7 +5,89 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     android:paddingBottom="@dimen/activity_vertical_margin" tools:context=".MainActivity">
 
-    <TextView android:text="@string/welcome_msg" android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+    <TextView
+        android:id="@+id/welcome_msg"
+        style="@style/DefaultText"
+        android:text="@string/welcome_msg"/>
 
+    <TextView
+        android:id="@+id/label_device_id"
+        style="@style/DefaultText.Label"
+        android:layout_below="@id/welcome_msg"
+        android:layout_marginTop="12dp"
+        android:text="@string/label_device_id"/>
+
+    <TextView
+        android:id="@+id/field_device_id"
+        style="@style/DefaultText"
+        android:layout_alignBaseline="@id/label_device_id"
+        android:layout_toRightOf="@id/label_device_id"
+        android:layout_marginLeft="8dp"
+        android:lines="2"
+        android:text="@string/not_yet_set"/>
+
+    <TextView
+        android:id="@+id/header_data_stats"
+        style="@style/DefaultText.Label"
+        android:layout_below="@id/label_device_id"
+        android:layout_marginTop="56dp"
+        android:textSize="22sp"
+        android:text="@string/header_data_stats"/>
+
+    <TextView
+        android:id="@+id/label_last_success"
+        style="@style/DefaultText.Label"
+        android:layout_below="@id/header_data_stats"
+        android:layout_marginTop="16dp"
+        android:text="@string/label_last_success"/>
+
+    <TextView
+        android:id="@+id/field_last_success"
+        style="@style/DefaultText"
+        android:layout_alignBaseline="@id/label_last_success"
+        android:layout_alignLeft="@+id/field_total_success"
+        android:text="@string/never"/>
+
+    <TextView
+        android:id="@+id/label_total_success"
+        style="@style/DefaultText.Label"
+        android:layout_below="@id/label_last_success"
+        android:layout_marginTop="4dp"
+        android:text="@string/label_total_success"/>
+
+    <TextView
+        android:id="@+id/field_total_success"
+        style="@style/DefaultText"
+        android:layout_alignBaseline="@id/label_total_success"
+        android:layout_toRightOf="@id/label_total_success"
+        android:layout_marginLeft="8dp"
+        android:text="@string/none"/>
+
+    <TextView
+        android:id="@+id/label_last_failure"
+        style="@style/DefaultText.Label"
+        android:layout_below="@id/label_last_success"
+        android:layout_marginTop="48dp"
+        android:text="@string/label_last_failure"/>
+
+    <TextView
+        android:id="@+id/field_last_failure"
+        style="@style/DefaultText"
+        android:layout_alignBaseline="@id/label_last_failure"
+        android:layout_alignLeft="@id/field_last_success"
+        android:text="@string/never"/>
+
+    <TextView
+        android:id="@+id/label_total_failure"
+        style="@style/DefaultText.Label"
+        android:layout_below="@id/label_last_failure"
+        android:layout_marginTop="4dp"
+        android:text="@string/label_total_failure"/>
+
+    <TextView
+        android:id="@+id/field_total_failure"
+        style="@style/DefaultText"
+        android:layout_alignBaseline="@id/label_total_failure"
+        android:layout_alignLeft="@id/field_last_failure"
+        android:text="@string/none"/>
 </RelativeLayout>

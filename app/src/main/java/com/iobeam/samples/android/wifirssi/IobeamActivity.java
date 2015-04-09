@@ -11,6 +11,7 @@ import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.TextView;
 
 import com.iobeam.api.ApiException;
 import com.iobeam.api.client.DataCallback;
@@ -19,6 +20,7 @@ import com.iobeam.api.client.RegisterCallback;
 import com.iobeam.api.client.RestRequest;
 import com.iobeam.api.resource.DataPoint;
 
+import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -41,8 +43,18 @@ public class IobeamActivity extends ActionBarActivity implements Handler.Callbac
     private static final int MSG_REGISTER_FAILURE = 4;  // sent if registration fails
     private static final long DELAY = TimeUnit.SECONDS.toMillis(20);  // take measurement every 20s
 
+    private static long totalSuccesses = 0;
+    private static long totalFailures = 0;
+
+    private TextView mDeviceField;
+    private TextView mFailureField;
+    private TextView mSuccessField;
+    private TextView mTotalFailureField;
+    private TextView mTotalSuccessField;
+
     private WifiManager mWifiManager;
     private Handler mHandler;
+    
     private DataCallback mDataCallback;
     private String mDeviceId;
     private boolean mCanSend = false;
@@ -50,16 +62,22 @@ public class IobeamActivity extends ActionBarActivity implements Handler.Callbac
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        mDeviceField = (TextView) findViewById(R.id.field_device_id);
+        mFailureField = (TextView) findViewById(R.id.field_last_failure);
+        mSuccessField = (TextView) findViewById(R.id.field_last_success);
+        mTotalFailureField = (TextView) findViewById(R.id.field_total_failure);
+        mTotalSuccessField = (TextView) findViewById(R.id.field_total_success);
+        mHandler = new Handler(this);
+
         initIobeam();
 
         // Setup app to get RSSI measurements and kick off the measurement loop. The Handler also
         // will be used for callbacks from registration (if needed) or from sending data.
         mWifiManager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
-        mHandler = new Handler(this);
         mHandler.sendEmptyMessage(MSG_GET_RSSI);
 
         initDataCallback();
-        setContentView(R.layout.activity_main);
     }
 
     /**
@@ -83,12 +101,9 @@ public class IobeamActivity extends ActionBarActivity implements Handler.Callbac
                 RegisterCallback cb = new RegisterCallback() {
                     @Override
                     public void onSuccess(String deviceId) {
-                        Message m = new Message();
-                        m.what = MSG_REGISTER_SUCCESS;
-                        m.getData().putString(KEY_DEVICE_ID, deviceId);
-                        mHandler.sendMessage(m);
                         mCanSend = true;
                         mDeviceId = deviceId;
+                        updateDeviceId(deviceId);
                     }
 
                     @Override
@@ -99,6 +114,9 @@ public class IobeamActivity extends ActionBarActivity implements Handler.Callbac
                     }
                 };
                 Iobeam.registerDeviceAsync(cb);
+            } else {
+                mCanSend = true;
+                updateDeviceId(mDeviceId);
             }
         } catch (ApiException e) {
             e.printStackTrace();
@@ -106,6 +124,12 @@ public class IobeamActivity extends ActionBarActivity implements Handler.Callbac
         }
     }
 
+    private void updateDeviceId(String id) {
+        Message m = new Message();
+        m.what = MSG_REGISTER_SUCCESS;
+        m.getData().putString(KEY_DEVICE_ID, id);
+        mHandler.sendMessage(m);
+    }
 
     private void initDataCallback() {
         // This callback notifies mHandler of success or failure.
@@ -172,27 +196,46 @@ public class IobeamActivity extends ActionBarActivity implements Handler.Callbac
         switch (m.what) {
             case MSG_GET_RSSI:
                 mHandler.removeMessages(MSG_GET_RSSI);  // remove spurious messages
-                // Get current RSSI value, add to import task, then schedule next reading.
-                int rssi = mWifiManager.getConnectionInfo().getRssi();
-                DataPoint d = new DataPoint(System.currentTimeMillis(), rssi);
-                addDataPoint(d);
+                // Get current RSSI value, add data point, then schedule next reading.
+                if (mWifiManager.getConnectionInfo().getBSSID() != null) {
+                    int rssi = mWifiManager.getConnectionInfo().getRssi();
+                    DataPoint d = new DataPoint(System.currentTimeMillis(), rssi);
+                    addDataPoint(d);
+                } else {
+                    Log.v(LOG_TAG, "Not connected to wifi, skipping...");
+                }
                 mHandler.sendEmptyMessageDelayed(MSG_GET_RSSI, DELAY);
                 return true;
             case MSG_SEND_SUCCESS:
-                Log.d(LOG_TAG, "Send succeeded");
-                return true;
             case MSG_SEND_FAILURE:
-                Log.d(LOG_TAG, "Send failed.");
+                boolean success = m.what == MSG_SEND_SUCCESS;
+                Log.d(LOG_TAG, "Send suceeded: " + success);
+
+                // Update counts and then update UI to reflect latest.
+                if (success)
+                    totalSuccesses++;
+                else
+                    totalFailures++;
+                TextView tvDate = success ? mSuccessField : mFailureField;
+                TextView tvCount = success ? mTotalSuccessField : mTotalFailureField;
+                long count = success ? totalSuccesses : totalFailures;
+                tvDate.setText(new Date().toString());
+                tvCount.setText(Long.toString(count));
                 return true;
             case MSG_REGISTER_SUCCESS:
-                // The Iobeam client persists the device ID, but we do as well in case we need it.
-                String deviceId = m.getData().getString(KEY_DEVICE_ID);
-                PreferenceManager.getDefaultSharedPreferences(this).edit()
-                        .putString(KEY_DEVICE_ID, deviceId).apply();
-                Log.d(LOG_TAG, "Registered device: " + deviceId);
-                return true;
             case MSG_REGISTER_FAILURE:
-                Log.d(LOG_TAG, "Register failed.");
+                Bundle data = m.getData();
+                boolean registered = data != null && data.getString(KEY_DEVICE_ID) != null;
+                Log.d(LOG_TAG, "Registeration succeeded: " + registered);
+                if (registered) {
+                    // The iobeam client persists the device ID, but we do as well.
+                    String deviceId = m.getData().getString(KEY_DEVICE_ID);
+                    PreferenceManager.getDefaultSharedPreferences(this).edit()
+                            .putString(KEY_DEVICE_ID, deviceId).apply();
+                    mDeviceField.setText(deviceId);
+                } else {
+                    mDeviceField.setText(getString(R.string.error));
+                }
                 return true;
             default:
                 return false;

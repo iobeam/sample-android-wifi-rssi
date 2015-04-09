@@ -7,7 +7,10 @@ callbacks.
 
 This app measures the signal strength of the WiFi on your phone using RSSI (received signal strength
 indicator). Measurements are taken every 20 seconds, and is uploaded to **iobeam** in batches of
-3 or more measurements.
+3 or more measurements. Using callbacks, statistics about the success/failure of submitting the data
+is displayed. Here is what it looks like:
+
+<img alt="Screenshot of the app" width="360" src="http://i.imgur.com/3iPqR4x.png" />
 
 All **iobeam** client library related code is in `IobeamActivity.java`
 

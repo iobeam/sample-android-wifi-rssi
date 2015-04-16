@@ -50,7 +50,7 @@ Check out device registration in `initIobeam()`, reproduced in part here:
             }
         };
 
-        Iobeam.registerDeviceAsync(cb);
+        iobeam.registerDeviceAsync(cb);
     }
 
 This is an example of registering a callback for device registration. This callback will be called

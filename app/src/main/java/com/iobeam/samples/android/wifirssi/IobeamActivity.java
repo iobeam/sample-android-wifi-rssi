@@ -41,6 +41,7 @@ public class IobeamActivity extends ActionBarActivity implements Handler.Callbac
     private static final int MSG_REGISTER_FAILURE = 4;  // sent if registration fails
     private static final long DELAY = TimeUnit.SECONDS.toMillis(20);  // take measurement every 20s
 
+    private static Iobeam iobeam;
     private static long totalSuccesses = 0;
     private static long totalFailures = 0;
 
@@ -90,8 +91,8 @@ public class IobeamActivity extends ActionBarActivity implements Handler.Callbac
         mDeviceId = prefs.getString(KEY_DEVICE_ID, null);
 
         try {
-            Iobeam.init(path, projectId, token, mDeviceId);
-            mDeviceId = Iobeam.getDeviceId();
+            iobeam = new Iobeam(path, projectId, token, mDeviceId);
+            mDeviceId = iobeam.getDeviceId();
 
             // If the device ID has not been set for this device yet, register for one. The callback
             // will send messages to mHandler to process.
@@ -111,7 +112,7 @@ public class IobeamActivity extends ActionBarActivity implements Handler.Callbac
                         mDeviceId = null;
                     }
                 };
-                Iobeam.registerDeviceAsync(cb);
+                iobeam.registerDeviceAsync(cb);
             } else {
                 mCanSend = true;
                 updateDeviceId(mDeviceId);
@@ -160,11 +161,11 @@ public class IobeamActivity extends ActionBarActivity implements Handler.Callbac
      */
     private void addDataPoint(DataPoint d) {
         Log.v(LOG_TAG, "data: " + d);
-        Iobeam.addData(SERIES_NAME, d);
+        iobeam.addData(SERIES_NAME, d);
 
-        if (mCanSend && Iobeam.getDataSize(SERIES_NAME) >= 3) {
+        if (mCanSend && iobeam.getDataSize(SERIES_NAME) >= 3) {
             try {
-                Iobeam.sendAsync(mDataCallback);
+                iobeam.sendAsync(mDataCallback);
             } catch (ApiException e) {
                 e.printStackTrace();
             }

@@ -138,7 +138,8 @@ public class IobeamActivity extends ActionBarActivity implements Handler.Callbac
             }
 
             @Override
-            public void onFailure(Throwable throwable, RestRequest restRequest) {
+            public void onFailure(Throwable t, RestRequest req) {
+                t.printStackTrace();
                 mHandler.sendEmptyMessage(MSG_SEND_FAILURE);
             }
         };

@@ -42,6 +42,8 @@ public class IobeamActivity extends ActionBarActivity implements Handler.Callbac
     private static final long DELAY = TimeUnit.SECONDS.toMillis(20);  // take measurement every 20s
 
     private static Iobeam iobeam;
+    private static long lastSuccess = 0;
+    private static long lastFailure = 0;
     private static long totalSuccesses = 0;
     private static long totalFailures = 0;
 
@@ -65,8 +67,14 @@ public class IobeamActivity extends ActionBarActivity implements Handler.Callbac
         mDeviceField = (TextView) findViewById(R.id.field_device_id);
         mFailureField = (TextView) findViewById(R.id.field_last_failure);
         mSuccessField = (TextView) findViewById(R.id.field_last_success);
+        if (lastFailure != 0)
+            mFailureField.setText(new Date(lastFailure).toString());
+        if (lastSuccess != 0)
+            mSuccessField.setText(new Date(lastSuccess).toString());
         mTotalFailureField = (TextView) findViewById(R.id.field_total_failure);
         mTotalSuccessField = (TextView) findViewById(R.id.field_total_success);
+        mTotalFailureField.setText(Long.toString(totalFailures));
+        mTotalSuccessField.setText(Long.toString(totalSuccesses));
         mHandler = new Handler(this);
 
         initIobeam();
@@ -191,17 +199,20 @@ public class IobeamActivity extends ActionBarActivity implements Handler.Callbac
             case MSG_SEND_FAILURE:
                 boolean success = m.what == MSG_SEND_SUCCESS;
                 Log.d(LOG_TAG, "Send suceeded: " + success);
-
-                // Update counts and then update UI to reflect latest.
-                if (success)
+                // Update stats and then update UI to reflect latest.
+                if (success) {
                     totalSuccesses++;
-                else
+                    lastSuccess = System.currentTimeMillis();
+                }
+                else {
                     totalFailures++;
-                TextView tvDate = success ? mSuccessField : mFailureField;
-                TextView tvCount = success ? mTotalSuccessField : mTotalFailureField;
-                long count = success ? totalSuccesses : totalFailures;
-                tvDate.setText(new Date().toString());
-                tvCount.setText(Long.toString(count));
+                    lastFailure = System.currentTimeMillis();
+                }
+
+                String countStr = Long.toString(success ? totalSuccesses : totalFailures);
+                String timeStr = new Date(success ? lastSuccess : lastFailure).toString();
+                (success ? mSuccessField : mFailureField).setText(timeStr);
+                (success ? mTotalSuccessField : mTotalFailureField).setText(countStr);
                 return true;
             case MSG_REGISTER_SUCCESS:
             case MSG_REGISTER_FAILURE:

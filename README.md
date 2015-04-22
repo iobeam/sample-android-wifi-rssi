@@ -76,7 +76,7 @@ reproduced in part here:
         }
     };
 
-Which can then be passed to `Iobeam.sendAsync()` as an argument. When the operation completes, it
+Which can then be passed to `iobeam.sendAsync()` as an argument. When the operation completes, it
 will call the appropriate success or failure method.
 
 ### Closing notes ###

@@ -19,6 +19,8 @@ import com.iobeam.api.client.RestRequest;
 import com.iobeam.api.resource.DataPoint;
 
 import java.util.Date;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -147,7 +149,7 @@ public class IobeamActivity extends ActionBarActivity implements Handler.Callbac
             }
 
             @Override
-            public void onFailure(Throwable t, RestRequest req) {
+            public void onFailure(Throwable t, Map<String, Set<DataPoint>> req) {
                 t.printStackTrace();
                 mHandler.sendEmptyMessage(MSG_SEND_FAILURE);
             }

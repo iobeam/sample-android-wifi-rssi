@@ -8,6 +8,7 @@
     <string name="label_last_failure">Last failure:</string>
     <string name="label_total_success">Total successes:</string>
     <string name="label_total_failure">Total failures:</string>
+    <string name="label_errors">Errors</string>
     <string name="error">ERROR</string>
     <string name="never">Never</string>
     <string name="none">0</string>

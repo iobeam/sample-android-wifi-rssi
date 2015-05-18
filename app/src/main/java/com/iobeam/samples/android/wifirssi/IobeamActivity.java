@@ -18,7 +18,10 @@ import com.iobeam.api.client.RegisterCallback;
 import com.iobeam.api.client.RestRequest;
 import com.iobeam.api.resource.DataPoint;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -48,12 +51,14 @@ public class IobeamActivity extends ActionBarActivity implements Handler.Callbac
     private static long lastFailure = 0;
     private static long totalSuccesses = 0;
     private static long totalFailures = 0;
+    private static final Map<String, Long> errors = new HashMap<String, Long>();
 
     private TextView mDeviceField;
     private TextView mFailureField;
     private TextView mSuccessField;
     private TextView mTotalFailureField;
     private TextView mTotalSuccessField;
+    private TextView mErrorsField;
 
     private WifiManager mWifiManager;
     private Handler mHandler;
@@ -77,6 +82,7 @@ public class IobeamActivity extends ActionBarActivity implements Handler.Callbac
         mTotalSuccessField = (TextView) findViewById(R.id.field_total_success);
         mTotalFailureField.setText(Long.toString(totalFailures));
         mTotalSuccessField.setText(Long.toString(totalSuccesses));
+        mErrorsField = (TextView) findViewById(R.id.field_errors);
         mHandler = new Handler(this);
 
         initIobeam();
@@ -151,6 +157,13 @@ public class IobeamActivity extends ActionBarActivity implements Handler.Callbac
             @Override
             public void onFailure(Throwable t, Map<String, Set<DataPoint>> req) {
                 t.printStackTrace();
+                String key = t.getClass().getSimpleName() + ": " + t.getMessage();
+                Long cnt = errors.get(key);
+                if (cnt == null) {
+                    cnt = 0l;
+                }
+                cnt++;
+                errors.put(key, cnt);
                 mHandler.sendEmptyMessage(MSG_SEND_FAILURE);
             }
         };
@@ -209,10 +222,21 @@ public class IobeamActivity extends ActionBarActivity implements Handler.Callbac
                 else {
                     totalFailures++;
                     lastFailure = System.currentTimeMillis();
+                    if (errors.size() > 0) {
+                        StringBuilder sb = new StringBuilder();
+                        for (String s : errors.keySet()) {
+                            sb.append(s);
+                            sb.append(" (");
+                            sb.append(errors.get(s));
+                            sb.append(")\n");
+                        }
+                        mErrorsField.setText(sb.toString());
+                    }
                 }
 
                 String countStr = Long.toString(success ? totalSuccesses : totalFailures);
-                String timeStr = new Date(success ? lastSuccess : lastFailure).toString();
+                String timeStr = new SimpleDateFormat("MM/dd/yyyy - HH:mm", Locale.US).format(
+                        new Date(success ? lastSuccess : lastFailure));
                 (success ? mSuccessField : mFailureField).setText(timeStr);
                 (success ? mTotalSuccessField : mTotalFailureField).setText(countStr);
                 return true;

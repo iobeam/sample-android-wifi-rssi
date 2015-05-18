@@ -90,4 +90,15 @@
         android:layout_alignBaseline="@id/label_total_failure"
         android:layout_alignLeft="@id/field_last_failure"
         android:text="@string/none"/>
+
+    <TextView
+        android:id="@+id/label_errors"
+        style="@style/DefaultText.Label"
+        android:layout_below="@id/label_total_failure"
+        android:layout_marginTop="36dp"
+        android:text="@string/label_errors"/>
+    <TextView
+        android:id="@+id/field_errors"
+        style="@style/DefaultText"
+        android:layout_below="@id/label_errors"/>
 </RelativeLayout>

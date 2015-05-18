@@ -71,13 +71,16 @@ reproduced in part here:
         }
 
         @Override
-        public void onFailure(Throwable throwable, RestRequest restRequest) {
+        public void onFailure(Throwable throwable, Map<String, Set<DataPoint>> req) {
             // failure code...
         }
     };
 
 Which can then be passed to `iobeam.sendAsync()` as an argument. When the operation completes, it
-will call the appropriate success or failure method.
+will call the appropriate success or failure method. When the send operation fails, the callback
+receives both the `Throwable` (usually an `Exception`) that results, as well as a
+`Map<String, Set<DataPoint>>`, which represents the data that was in the last request. The keys are
+ series names, while the `Set<DataPoint>` contains the `DataPoint`s associated with the series.
 
 ### Closing notes ###
 

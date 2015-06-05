@@ -53,6 +53,10 @@ public class IobeamActivity extends ActionBarActivity implements Handler.Callbac
     private static long totalFailures = 0;
     private static final Map<String, Long> errors = new HashMap<String, Long>();
 
+    private static String formatDate(long msec) {
+        return new SimpleDateFormat("MM/dd/yyyy - HH:mm", Locale.US).format(new Date(msec));
+    }
+
     private TextView mDeviceField;
     private TextView mFailureField;
     private TextView mSuccessField;
@@ -75,9 +79,9 @@ public class IobeamActivity extends ActionBarActivity implements Handler.Callbac
         mFailureField = (TextView) findViewById(R.id.field_last_failure);
         mSuccessField = (TextView) findViewById(R.id.field_last_success);
         if (lastFailure != 0)
-            mFailureField.setText(new Date(lastFailure).toString());
+            mFailureField.setText(formatDate(lastFailure));
         if (lastSuccess != 0)
-            mSuccessField.setText(new Date(lastSuccess).toString());
+            mSuccessField.setText(formatDate(lastSuccess));
         mTotalFailureField = (TextView) findViewById(R.id.field_total_failure);
         mTotalSuccessField = (TextView) findViewById(R.id.field_total_success);
         mTotalFailureField.setText(Long.toString(totalFailures));
@@ -235,8 +239,7 @@ public class IobeamActivity extends ActionBarActivity implements Handler.Callbac
                 }
 
                 String countStr = Long.toString(success ? totalSuccesses : totalFailures);
-                String timeStr = new SimpleDateFormat("MM/dd/yyyy - HH:mm", Locale.US).format(
-                        new Date(success ? lastSuccess : lastFailure));
+                String timeStr = formatDate(success ? lastSuccess : lastFailure);
                 (success ? mSuccessField : mFailureField).setText(timeStr);
                 (success ? mTotalSuccessField : mTotalFailureField).setText(countStr);
                 return true;

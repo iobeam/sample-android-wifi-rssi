@@ -46,6 +46,8 @@ public class IobeamActivity extends ActionBarActivity implements Handler.Callbac
     private static final int MSG_REGISTER_FAILURE = 4;  // sent if registration fails
     private static final long DELAY = TimeUnit.SECONDS.toMillis(20);  // take measurement every 20s
 
+    private static final int BATCH_SIZE = 3;
+
     private static Iobeam iobeam;
     private static long lastSuccess = 0;
     private static long lastFailure = 0;
@@ -105,6 +107,7 @@ public class IobeamActivity extends ActionBarActivity implements Handler.Callbac
     private void initIobeam() {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         String path = getFilesDir().getAbsolutePath();
+
         // projectId and token are defined in the res/values/iobeam_config.xml file.
         int projectId = getResources().getInteger(R.integer.iobeam_project_id);
         String token = getString(R.string.iobeam_project_token);
@@ -113,6 +116,7 @@ public class IobeamActivity extends ActionBarActivity implements Handler.Callbac
         try {
             iobeam = new Iobeam(path, projectId, token, mDeviceId);
             mDeviceId = iobeam.getDeviceId();
+            iobeam.setAutoRetry(true);
 
             // If the device ID has not been set for this device yet, register for one. The callback
             // will send messages to mHandler to process.
@@ -190,7 +194,7 @@ public class IobeamActivity extends ActionBarActivity implements Handler.Callbac
         Log.v(LOG_TAG, "data: " + d);
         iobeam.addData(SERIES_NAME, d);
 
-        if (mCanSend && iobeam.getDataSize(SERIES_NAME) >= 3) {
+        if (mCanSend && iobeam.getDataSize(SERIES_NAME) >= BATCH_SIZE) {
             try {
                 iobeam.sendAsync(mDataCallback);
             } catch (ApiException e) {
@@ -207,7 +211,7 @@ public class IobeamActivity extends ActionBarActivity implements Handler.Callbac
                 // Get current RSSI value, add data point, then schedule next reading.
                 if (mWifiManager.getConnectionInfo().getBSSID() != null) {
                     int rssi = mWifiManager.getConnectionInfo().getRssi();
-                    DataPoint d = new DataPoint(System.currentTimeMillis(), rssi);
+                    DataPoint d = new DataPoint(rssi);
                     addDataPoint(d);
                 } else {
                     Log.v(LOG_TAG, "Not connected to wifi, skipping...");

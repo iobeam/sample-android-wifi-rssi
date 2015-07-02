@@ -3,4 +3,6 @@
     <dimen name="activity_horizontal_margin">8dp</dimen>
     <dimen name="activity_vertical_margin">8dp</dimen>
     <dimen name="card_content_padding">8dp</dimen>
+    <dimen name="card_vertical_top_margin">0dp</dimen>
+    <dimen name="card_vertical_bottom_margin">16dp</dimen>
 </resources>

@@ -9,6 +9,7 @@ import android.os.Message;
 import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
+import android.view.MenuItem;
 import android.widget.TextView;
 
 import com.iobeam.api.ApiException;
@@ -101,6 +102,20 @@ public class IobeamActivity extends ActionBarActivity implements Handler.Callbac
         initDataCallback();
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                return true;
+            case R.id.menu_reset:
+                // Not implemented for now.
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+
     /**
      * Initializes the Iobeam client library, including registering for a new device ID if needed.
      */
@@ -165,7 +180,8 @@ public class IobeamActivity extends ActionBarActivity implements Handler.Callbac
             @Override
             public void onFailure(Throwable t, Map<String, Set<DataPoint>> req) {
                 t.printStackTrace();
-                String key = t.getClass().getSimpleName() + ": " + t.getMessage();
+                String key = t.getClass().getSimpleName() + ": " + t.getMessage().substring(0, 20);
+
                 Long cnt = errors.get(key);
                 if (cnt == null) {
                     cnt = 0l;
@@ -251,7 +267,7 @@ public class IobeamActivity extends ActionBarActivity implements Handler.Callbac
             case MSG_REGISTER_FAILURE:
                 Bundle data = m.getData();
                 boolean registered = data != null && data.getString(KEY_DEVICE_ID) != null;
-                Log.d(LOG_TAG, "Registeration succeeded: " + registered);
+                Log.d(LOG_TAG, "Registration succeeded: " + registered);
                 if (registered) {
                     // The iobeam client persists the device ID, but we do as well.
                     String deviceId = m.getData().getString(KEY_DEVICE_ID);

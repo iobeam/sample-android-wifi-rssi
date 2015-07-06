@@ -10,7 +10,7 @@ indicator). Measurements are taken every 20 seconds, and are uploaded to **iobea
 3 or more measurements. Using callbacks, statistics about the success/failure of submitting the data
 is displayed. Here is what it looks like:
 
-<img alt="Screenshot of the app" width="360" src="http://i.imgur.com/3iPqR4x.png" />
+<img alt="Screenshot of the app" width="360" src="http://i.imgur.com/THuMzaX.png" />
 
 All **iobeam** client library related code is in `IobeamActivity.java`
 

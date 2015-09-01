@@ -121,19 +121,16 @@ public class IobeamActivity extends AppCompatActivity implements Handler.Callbac
      */
     private void initIobeam() {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        String path = getFilesDir().getAbsolutePath();
+        final String PATH = getFilesDir().getAbsolutePath();
 
         // projectId and token are defined in the res/values/iobeam_config.xml file.
         int projectId = getResources().getInteger(R.integer.iobeam_project_id);
         String token = getString(R.string.iobeam_project_token);
         mDeviceId = prefs.getString(KEY_DEVICE_ID, null);
 
+        Iobeam.Builder builder = new Iobeam.Builder(projectId, token);
+        iobeam = builder.autoRetry().saveIdToPath(PATH).setDeviceId(mDeviceId).build();
         try {
-            iobeam = new Iobeam.Builder(projectId, token)
-                    .saveIdToPath(path)
-                    .setDeviceId(mDeviceId)
-                    .autoRetry()
-                    .build();
             mDeviceId = iobeam.getDeviceId();
 
             // If the device ID has not been set for this device yet, register for one. The callback

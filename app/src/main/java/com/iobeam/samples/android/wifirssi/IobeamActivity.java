@@ -7,7 +7,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.MenuItem;
 import android.widget.TextView;
@@ -33,7 +33,7 @@ import java.util.concurrent.TimeUnit;
  * that data periodically. By default, readings are taken every 20s and are send to the iobeam Cloud
  * once there are 3 readings.
  */
-public class IobeamActivity extends ActionBarActivity implements Handler.Callback {
+public class IobeamActivity extends AppCompatActivity implements Handler.Callback {
 
     private static final String LOG_TAG = "IobeamActivity";
 
@@ -203,14 +203,16 @@ public class IobeamActivity extends ActionBarActivity implements Handler.Callbac
     }
 
     /**
-     * Adds a DataPoint to an ongoing ImportTask, launching or creating the task as necessary.
+     * Adds a DataPoint to iobeam for future sending. Sends when iobeam's data store contains more
+     * than `BATCH_SIZE` points.
+     *
      * @param d Data to be added.
      */
     private void addDataPoint(DataPoint d) {
         Log.v(LOG_TAG, "data: " + d);
         iobeam.addData(SERIES_NAME, d);
 
-        if (mCanSend && iobeam.getDataSize(SERIES_NAME) >= BATCH_SIZE) {
+        if (mCanSend && iobeam.getTotalDataSize() >= BATCH_SIZE) {
             try {
                 iobeam.sendAsync(mDataCallback);
             } catch (ApiException e) {

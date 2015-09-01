@@ -50,7 +50,8 @@
         <android.support.v7.widget.CardView
             android:id="@+id/card_stats"
             style="@style/DefaultCard"
-            android:layout_below="@id/card_header">
+            android:layout_below="@id/card_header"
+            android:layout_marginTop="@dimen/card_top_margin">
 
             <RelativeLayout
                 android:id="@+id/card_stats_layout"
@@ -131,7 +132,8 @@
         <android.support.v7.widget.CardView
             android:id="@+id/card_errors"
             style="@style/DefaultCard"
-            android:layout_below="@id/card_stats">
+            android:layout_below="@id/card_stats"
+            android:layout_marginTop="@dimen/card_top_margin">
 
             <RelativeLayout
                 android:id="@+id/card_errors_layout"

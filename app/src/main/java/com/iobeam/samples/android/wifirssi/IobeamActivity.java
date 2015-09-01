@@ -13,10 +13,10 @@ import android.view.MenuItem;
 import android.widget.TextView;
 
 import com.iobeam.api.ApiException;
-import com.iobeam.api.client.DataCallback;
 import com.iobeam.api.client.Iobeam;
 import com.iobeam.api.client.RegisterCallback;
 import com.iobeam.api.client.RestRequest;
+import com.iobeam.api.client.SendCallback;
 import com.iobeam.api.resource.DataPoint;
 
 import java.text.SimpleDateFormat;
@@ -70,7 +70,7 @@ public class IobeamActivity extends AppCompatActivity implements Handler.Callbac
     private WifiManager mWifiManager;
     private Handler mHandler;
     
-    private DataCallback mDataCallback;
+    private SendCallback mDataCallback;
     private String mDeviceId;
     private boolean mCanSend = false;
 
@@ -174,9 +174,9 @@ public class IobeamActivity extends AppCompatActivity implements Handler.Callbac
 
     private void initDataCallback() {
         // This callback notifies mHandler of success or failure.
-        mDataCallback = new DataCallback() {
+        mDataCallback = new SendCallback() {
             @Override
-            public void onSuccess() {
+            public void onSuccess(Map<String, Set<DataPoint>> req) {
                 mHandler.sendEmptyMessage(MSG_SEND_SUCCESS);
             }
 
@@ -215,7 +215,7 @@ public class IobeamActivity extends AppCompatActivity implements Handler.Callbac
         Log.v(LOG_TAG, "data: " + d);
         iobeam.addData(SERIES_NAME, d);
 
-        if (mCanSend && iobeam.getTotalDataSize() >= BATCH_SIZE) {
+        if (mCanSend && iobeam.getDataSize() >= BATCH_SIZE) {
             try {
                 iobeam.sendAsync(mDataCallback);
             } catch (ApiException e) {

@@ -95,6 +95,7 @@
     <orderEntry type="library" exported="" name="iobeam-client-java-0.4.4" level="project" />
     <orderEntry type="library" exported="" name="support-annotations-22.2.1" level="project" />
     <orderEntry type="library" exported="" name="cardview-v7-22.2.1" level="project" />
+    <orderEntry type="library" exported="" name="iobeam-client-java-0.5.0-SNAPSHOT" level="project" />
     <orderEntry type="library" exported="" name="appcompat-v7-22.2.1" level="project" />
   </component>
 </module>

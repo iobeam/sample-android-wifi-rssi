@@ -129,9 +129,12 @@ public class IobeamActivity extends AppCompatActivity implements Handler.Callbac
         mDeviceId = prefs.getString(KEY_DEVICE_ID, null);
 
         try {
-            iobeam = new Iobeam(path, projectId, token, mDeviceId);
+            iobeam = new Iobeam.Builder(projectId, token)
+                    .saveIdToPath(path)
+                    .setDeviceId(mDeviceId)
+                    .autoRetry()
+                    .build();
             mDeviceId = iobeam.getDeviceId();
-            iobeam.setAutoRetry(true);
 
             // If the device ID has not been set for this device yet, register for one. The callback
             // will send messages to mHandler to process.

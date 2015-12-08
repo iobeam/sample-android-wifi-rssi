@@ -17,20 +17,20 @@ import com.iobeam.api.client.Iobeam;
 import com.iobeam.api.client.RegisterCallback;
 import com.iobeam.api.client.RestRequest;
 import com.iobeam.api.client.SendCallback;
-import com.iobeam.api.resource.DataPoint;
+import com.iobeam.api.resource.DataBatch;
+import com.iobeam.api.resource.ImportBatch;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 /**
  * This is an example activity of how to use the iobeam Java client library. This example will
  * measure the RSSI of the WiFi at periodic intervals, batch them into an import request, and import
- * that data periodically. By default, readings are taken every 20s and are send to the iobeam Cloud
+ * that data periodically. By default, readings are taken every 20s and are send to iobeam
  * once there are 3 readings.
  */
 public class IobeamActivity extends AppCompatActivity implements Handler.Callback {
@@ -40,6 +40,7 @@ public class IobeamActivity extends AppCompatActivity implements Handler.Callbac
     private static final String SERIES_NAME = "rssi";
     private static final String KEY_DEVICE_ID = "device_id";
 
+    /* UI control constants */
     private static final int MSG_GET_RSSI = 0;
     private static final int MSG_SEND_SUCCESS = 1;  // sent if data upload succeeds
     private static final int MSG_SEND_FAILURE = 2;  // sent if data upload fails
@@ -50,6 +51,8 @@ public class IobeamActivity extends AppCompatActivity implements Handler.Callbac
     private static final int BATCH_SIZE = 3;
 
     private static Iobeam iobeam;
+    private static DataBatch wifiBatch = new DataBatch(new String[]{SERIES_NAME});
+
     private static long lastSuccess = 0;
     private static long lastFailure = 0;
     private static long totalSuccesses = 0;
@@ -60,6 +63,7 @@ public class IobeamActivity extends AppCompatActivity implements Handler.Callbac
         return new SimpleDateFormat("MM/dd/yyyy - HH:mm", Locale.US).format(new Date(msec));
     }
 
+    /* Views */
     private TextView mDeviceField;
     private TextView mFailureField;
     private TextView mSuccessField;
@@ -128,8 +132,10 @@ public class IobeamActivity extends AppCompatActivity implements Handler.Callbac
         String token = getString(R.string.iobeam_project_token);
         mDeviceId = prefs.getString(KEY_DEVICE_ID, null);
 
-        Iobeam.Builder builder = new Iobeam.Builder(projectId, token);
-        iobeam = builder.autoRetry().saveIdToPath(PATH).setDeviceId(mDeviceId).build();
+        if (iobeam == null) {
+            Iobeam.Builder builder = new Iobeam.Builder(projectId, token);
+            iobeam = builder.autoRetry().saveIdToPath(PATH).setDeviceId(mDeviceId).build();
+        }
         try {
             mDeviceId = iobeam.getDeviceId();
 
@@ -146,6 +152,7 @@ public class IobeamActivity extends AppCompatActivity implements Handler.Callbac
 
                     @Override
                     public void onFailure(Throwable throwable, RestRequest restRequest) {
+                        throwable.printStackTrace();
                         mHandler.sendEmptyMessage(MSG_REGISTER_FAILURE);
                         mCanSend = false;
                         mDeviceId = null;
@@ -160,6 +167,7 @@ public class IobeamActivity extends AppCompatActivity implements Handler.Callbac
             e.printStackTrace();
             mCanSend = false;
         }
+        iobeam.trackDataBatch(wifiBatch);
     }
 
     private void updateDeviceId(String id) {
@@ -173,12 +181,12 @@ public class IobeamActivity extends AppCompatActivity implements Handler.Callbac
         // This callback notifies mHandler of success or failure.
         mDataCallback = new SendCallback() {
             @Override
-            public void onSuccess(Map<String, Set<DataPoint>> req) {
+            public void onSuccess(ImportBatch data) {
                 mHandler.sendEmptyMessage(MSG_SEND_SUCCESS);
             }
 
             @Override
-            public void onFailure(Throwable t, Map<String, Set<DataPoint>> req) {
+            public void onFailure(Throwable t, ImportBatch req) {
                 t.printStackTrace();
                 String key = t.getClass().getSimpleName() + ": " + t.getMessage().substring(0, 20);
 
@@ -203,14 +211,14 @@ public class IobeamActivity extends AppCompatActivity implements Handler.Callbac
     }
 
     /**
-     * Adds a DataPoint to iobeam for future sending. Sends when iobeam's data store contains more
-     * than `BATCH_SIZE` points.
+     * Adds an RSSI reading to iobeam for future sending. Readings are sent when iobeam's data store
+     * contains more than `BATCH_SIZE` points.
      *
-     * @param d Data to be added.
+     * @param rssi RSSI value to be added
      */
-    private void addDataPoint(DataPoint d) {
-        Log.v(LOG_TAG, "data: " + d);
-        iobeam.addData(SERIES_NAME, d);
+    private void addDataPoint(int rssi) {
+        Log.v(LOG_TAG, "rssi: " + rssi);
+        wifiBatch.add(System.currentTimeMillis(), new String[]{SERIES_NAME}, new Object[]{rssi});
 
         if (mCanSend && iobeam.getDataSize() >= BATCH_SIZE) {
             try {
@@ -229,8 +237,7 @@ public class IobeamActivity extends AppCompatActivity implements Handler.Callbac
                 // Get current RSSI value, add data point, then schedule next reading.
                 if (mWifiManager.getConnectionInfo().getBSSID() != null) {
                     int rssi = mWifiManager.getConnectionInfo().getRssi();
-                    DataPoint d = new DataPoint(rssi);
-                    addDataPoint(d);
+                    addDataPoint(rssi);
                 } else {
                     Log.v(LOG_TAG, "Not connected to wifi, skipping...");
                 }

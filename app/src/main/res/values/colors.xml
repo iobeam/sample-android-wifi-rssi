@@ -2,4 +2,5 @@
 <resources>
     <color name="default_text">#5F5F5F</color>
     <color name="linebreak">#CCCCCC</color>
+    <color name="default_bg">#DEDEDE</color>
 </resources>

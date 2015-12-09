@@ -27,7 +27,7 @@ repositories {
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
-    compile('com.iobeam:iobeam-client-java:0.5.0-SNAPSHOT') {
+    compile('com.iobeam:iobeam-client-java:0.5.0') {
         exclude module: 'json'
     }
     compile 'com.android.support:appcompat-v7:22.2.1'

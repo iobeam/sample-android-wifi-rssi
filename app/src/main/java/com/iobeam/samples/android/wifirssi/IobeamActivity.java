@@ -91,8 +91,8 @@ public class IobeamActivity extends AppCompatActivity implements Handler.Callbac
             mSuccessField.setText(formatDate(lastSuccess));
         mTotalFailureField = (TextView) findViewById(R.id.field_total_failure);
         mTotalSuccessField = (TextView) findViewById(R.id.field_total_success);
-        mTotalFailureField.setText(Long.toString(totalFailures));
-        mTotalSuccessField.setText(Long.toString(totalSuccesses));
+        mTotalFailureField.setText(String.format(Locale.US, "%d", totalFailures));
+        mTotalSuccessField.setText(String.format(Locale.US, "%d", totalSuccesses));
         mErrorsField = (TextView) findViewById(R.id.field_errors);
         mHandler = new Handler(this);
 
@@ -188,7 +188,8 @@ public class IobeamActivity extends AppCompatActivity implements Handler.Callbac
             @Override
             public void onFailure(Throwable t, ImportBatch req) {
                 t.printStackTrace();
-                String key = t.getClass().getSimpleName() + ": " + t.getMessage().substring(0, 20);
+                String key = String.format("%s: %s", t.getClass().getSimpleName(), 
+                        t.getMessage().substring(0, 20));
 
                 Long cnt = errors.get(key);
                 if (cnt == null) {
@@ -218,7 +219,7 @@ public class IobeamActivity extends AppCompatActivity implements Handler.Callbac
      */
     private void addDataPoint(int rssi) {
         Log.v(LOG_TAG, "rssi: " + rssi);
-        wifiBatch.add(System.currentTimeMillis(), new String[]{SERIES_NAME}, new Object[]{rssi});
+        wifiBatch.add(new String[]{SERIES_NAME}, new Object[]{rssi});
 
         if (mCanSend && iobeam.getDataSize() >= BATCH_SIZE) {
             try {

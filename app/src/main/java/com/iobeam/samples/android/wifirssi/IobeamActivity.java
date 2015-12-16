@@ -17,7 +17,7 @@ import com.iobeam.api.client.Iobeam;
 import com.iobeam.api.client.RegisterCallback;
 import com.iobeam.api.client.RestRequest;
 import com.iobeam.api.client.SendCallback;
-import com.iobeam.api.resource.DataBatch;
+import com.iobeam.api.resource.DataStore;
 import com.iobeam.api.resource.ImportBatch;
 
 import java.text.SimpleDateFormat;
@@ -51,7 +51,7 @@ public class IobeamActivity extends AppCompatActivity implements Handler.Callbac
     private static final int BATCH_SIZE = 3;
 
     private static Iobeam iobeam;
-    private static DataBatch wifiBatch = new DataBatch(new String[]{SERIES_NAME});
+    private static DataStore wifiReadings;
 
     private static long lastSuccess = 0;
     private static long lastFailure = 0;
@@ -135,6 +135,7 @@ public class IobeamActivity extends AppCompatActivity implements Handler.Callbac
         if (iobeam == null) {
             Iobeam.Builder builder = new Iobeam.Builder(projectId, token);
             iobeam = builder.autoRetry().saveIdToPath(PATH).setDeviceId(mDeviceId).build();
+            wifiReadings = iobeam.createDataStore(SERIES_NAME);
         }
         try {
             mDeviceId = iobeam.getDeviceId();
@@ -167,7 +168,6 @@ public class IobeamActivity extends AppCompatActivity implements Handler.Callbac
             e.printStackTrace();
             mCanSend = false;
         }
-        iobeam.trackDataBatch(wifiBatch);
     }
 
     private void updateDeviceId(String id) {
@@ -188,7 +188,7 @@ public class IobeamActivity extends AppCompatActivity implements Handler.Callbac
             @Override
             public void onFailure(Throwable t, ImportBatch req) {
                 t.printStackTrace();
-                String key = String.format("%s: %s", t.getClass().getSimpleName(), 
+                String key = String.format("%s: %s", t.getClass().getSimpleName(),
                         t.getMessage().substring(0, 20));
 
                 Long cnt = errors.get(key);
@@ -219,7 +219,7 @@ public class IobeamActivity extends AppCompatActivity implements Handler.Callbac
      */
     private void addDataPoint(int rssi) {
         Log.v(LOG_TAG, "rssi: " + rssi);
-        wifiBatch.add(new String[]{SERIES_NAME}, new Object[]{rssi});
+        wifiReadings.add(new String[]{SERIES_NAME}, new Object[]{rssi});
 
         if (mCanSend && iobeam.getDataSize() >= BATCH_SIZE) {
             try {

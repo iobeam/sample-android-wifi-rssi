@@ -40,17 +40,14 @@ Check out device registration in `initIobeam()`, reproduced in part here:
 iobeam.registerOrSetDeviceAsync(mDeviceId, new RegisterCallback() {
     @Override
     public void onSuccess(String deviceId) {
-        mCanSend = true;
         mDeviceId = deviceId;
-        updateDeviceId(deviceId);
+        // success code...
     }
 
     @Override
     public void onFailure(Throwable throwable, RestRequest restRequest) {
-        throwable.printStackTrace();
-        mHandler.sendEmptyMessage(MSG_REGISTER_FAILURE);
-        mCanSend = false;
         mDeviceId = null;
+        // failure code...
     }
 });
 ```

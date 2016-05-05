@@ -125,7 +125,6 @@ public class IobeamActivity extends AppCompatActivity implements Handler.Callbac
      */
     private void initIobeam() {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        final String PATH = getFilesDir().getAbsolutePath();
 
         // projectId and token are defined in the res/values/iobeam_config.xml file.
         int projectId = getResources().getInteger(R.integer.iobeam_project_id);
@@ -133,37 +132,28 @@ public class IobeamActivity extends AppCompatActivity implements Handler.Callbac
         mDeviceId = prefs.getString(KEY_DEVICE_ID, null);
 
         if (iobeam == null) {
-            Iobeam.Builder builder = new Iobeam.Builder(projectId, token);
-            iobeam = builder.autoRetry().saveIdToPath(PATH).setDeviceId(mDeviceId).build();
+            iobeam = new Iobeam.Builder(projectId, token)
+                    .autoRetry()
+                    .build();
             wifiReadings = iobeam.createDataStore(SERIES_NAME);
         }
         try {
-            mDeviceId = iobeam.getDeviceId();
+            iobeam.registerOrSetDeviceAsync(mDeviceId, new RegisterCallback() {
+                @Override
+                public void onSuccess(String deviceId) {
+                    mCanSend = true;
+                    mDeviceId = deviceId;
+                    updateDeviceId(deviceId);
+                }
 
-            // If the device ID has not been set for this device yet, register for one. The callback
-            // will send messages to mHandler to process.
-            if (mDeviceId == null) {
-                RegisterCallback cb = new RegisterCallback() {
-                    @Override
-                    public void onSuccess(String deviceId) {
-                        mCanSend = true;
-                        mDeviceId = deviceId;
-                        updateDeviceId(deviceId);
-                    }
-
-                    @Override
-                    public void onFailure(Throwable throwable, RestRequest restRequest) {
-                        throwable.printStackTrace();
-                        mHandler.sendEmptyMessage(MSG_REGISTER_FAILURE);
-                        mCanSend = false;
-                        mDeviceId = null;
-                    }
-                };
-                iobeam.registerDeviceAsync(cb);
-            } else {
-                mCanSend = true;
-                updateDeviceId(mDeviceId);
-            }
+                @Override
+                public void onFailure(Throwable throwable, RestRequest restRequest) {
+                    throwable.printStackTrace();
+                    mHandler.sendEmptyMessage(MSG_REGISTER_FAILURE);
+                    mCanSend = false;
+                    mDeviceId = null;
+                }
+            });
         } catch (ApiException e) {
             e.printStackTrace();
             mCanSend = false;
@@ -193,7 +183,7 @@ public class IobeamActivity extends AppCompatActivity implements Handler.Callbac
 
                 Long cnt = errors.get(key);
                 if (cnt == null) {
-                    cnt = 0l;
+                    cnt = 0L;
                 }
                 cnt++;
                 errors.put(key, cnt);

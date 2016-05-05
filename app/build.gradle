@@ -8,8 +8,8 @@ android {
         applicationId 'com.iobeam.samples.android.wifirssi'
         minSdkVersion 15
         targetSdkVersion 22
-        versionCode 11
-        versionName "2.2"
+        versionCode 12
+        versionName "2.3"
     }
 
     buildTypes {
@@ -27,7 +27,7 @@ repositories {
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
-    compile('com.iobeam:iobeam-client-java:0.5.3') {
+    compile('com.iobeam:iobeam-client-java:0.5.13') {
         exclude module: 'json'
     }
     compile 'com.android.support:appcompat-v7:22.2.1'

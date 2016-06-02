@@ -212,11 +212,7 @@ public class IobeamActivity extends AppCompatActivity implements Handler.Callbac
         wifiReadings.add(new String[]{SERIES_NAME}, new Object[]{rssi});
 
         if (mCanSend && iobeam.getDataSize() >= BATCH_SIZE) {
-            try {
-                iobeam.sendAsync(mDataCallback);
-            } catch (ApiException e) {
-                e.printStackTrace();
-            }
+            iobeam.sendAsync(mDataCallback);
         }
     }
 
